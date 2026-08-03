@@ -1,4 +1,4 @@
-# Prototype 0.1 scope
+# Prototype 0.2 scope
 
 Included: the complete static Encounter One flow, Core and Christ-Centered modes, two simulated local partners, together mode, deterministic approved-content bridge, pause/resume, shared record, feedback, responsive UI and local persistence.
 

@@ -5,7 +5,7 @@ The prototype is delivered in vertical slices: structured content, local journey
 
 ## Decisions
 - **Local reducer and Context:** one serializable state tree makes privacy boundaries reviewable. Each partner owns a separate response map; shared screens read only approved extracts.
-- **localStorage persistence:** `weddingos-prototype-v1` preserves refresh progress. This is convenience, not security; Reset Demo removes the working state.
+- **localStorage persistence:** `weddingos-prototype-v2` preserves refresh progress. This is convenience, not security; Reset Prototype v0.2 removes the working state.
 - **Deterministic bridge:** the bridge counts approved exact responses or approved summaries. It never examines private text to generate shared language.
 - **Route-first experience:** every meaningful moment has a URL so pilots can return to a precise place. Prototype navigation remains intentionally permissive for review.
 - **Static content:** Scripture and journey copy ship in the bundle. There are no API calls, AI services, analytics, external assets, or fonts.

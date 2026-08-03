@@ -1,8 +1,8 @@
-# WeddingOS Prototype 0.1
+# WeddingOS Prototype 0.2
 
-A polished, local prototype of Journey 001, Encounter One: **“What Are We Saying Yes To?”** WeddingOS helps couples distinguish readiness for marriage from readiness for a celebration. It supports understanding and never recommends marrying now or waiting.
+A local prototype of Journey 001, Encounter One: **“What Are We Saying Yes To?”** It tests whether couples benefit from exploring marriage meaning before wedding structure. WeddingOS supports understanding and never recommends whether, when or how a couple should marry.
 
-> **Privacy warning:** Build 1 simulates Partner A and Partner B in one browser using localStorage. Do not enter sensitive or identifying information. This is not real privacy or authentication. Firebase and real two-user privacy will be considered only after the experience is approved.
+> **Privacy warning:** This prototype simulates Partner A and Partner B in one browser using localStorage. Do not enter sensitive or identifying information. This is not production privacy or authentication.
 
 ## Install and run
 ```bash
@@ -13,16 +13,15 @@ npm run dev
 ## Scripts
 - `npm run dev` — Vite development server
 - `npm run lint` — ESLint
-- `npm run test` — Vitest unit/component checks
+- `npm run test` — Vitest
 - `npm run build` — TypeScript and production bundle
-- `npm run test:e2e` — Playwright browser journey
-- `npm run format` — Prettier
+- `npm run test:e2e` — Playwright
 
 ## Structure
-`src/content` holds copy; `src/types` the domain model; `src/state` reducer, persistence and approved-content rules; `src/components` reusable shell; `src/pages` route experiences; `src/routes` routing; `tests` Vitest; `e2e` Playwright; and `docs` product, scope, architecture and testing decisions.
+`src/content` holds static copy and options; `src/types` the domain model; `src/state` reducer, v2 persistence and permission rules; `src/components` reusable interaction primitives; `src/pages` route experiences; `tests` and `e2e` automated checks; and `docs` design and technical decisions.
 
-## Reset demo data
-Open **Prototype menu** from any screen and choose **Reset Demo**. This returns to the welcome screen and replaces saved prototype state. Browser storage may also be cleared manually.
+## Reset Prototype v0.2
+Open **Prototype menu** and choose **Reset Prototype v0.2**. Revised data uses the `weddingos-prototype-v2` key; v0.1 answers are not loaded into revised prompts.
 
 ## Limitations
-There is no backend, authentication, cross-device synchronization, production privacy, AI, analytics, payment, or deployment. Route guards are intentionally soft for prototype review. Encounter Two is intentionally unavailable.
+This remains a one-device experience-testing simulation. No production privacy, backend, Firebase, AI, authentication, synchronization, analytics, deployment or payment service exists. Encounter Two is shown only as unavailable and is not built.
