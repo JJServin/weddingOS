@@ -6,4 +6,4 @@ export interface PartnerFeedback {scales:Record<string,number>;strongestMoment?:
 export interface PartnerState {preparationStatus:'not-started'|'in-progress'|'complete';responses:Record<string,PrivateResponse>;listenerCheck?:string;integration?:{learned?:string;heard?:string;prediction?:string;unable?:string;next?:string};feedback?:PartnerFeedback}
 export interface RevealEntry {prediction?:string;ready:boolean;listenerCheck?:string}
 export interface SharedState {mode:JourneyMode;stage:string;previousPath?:string;bridgeApprovals:PartnerId[];discoveries:{sharedValue?:string;difference?:string;question?:string;understandsBetter?:string;nextStep?:string};sharedNotes?:string;mirror:{generatedText:string;assessment?:MirrorAssessment;corrections:Partial<Record<'partly'|'not-quite',string>>;saveApproved:boolean};pauseCheck?:PauseCheckValue;reveal:{entries:Record<PartnerId,RevealEntry>;revealed:boolean}}
-export interface JourneyState {role:Role;partners:Record<PartnerId,PartnerState>;shared:SharedState}
+export interface JourneyState {schemaVersion:2;role:Role;partners:Record<PartnerId,PartnerState>;shared:SharedState}
