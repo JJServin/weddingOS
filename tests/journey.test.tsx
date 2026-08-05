@@ -13,6 +13,7 @@ import {
   STORAGE_KEY,
 } from '../src/state/JourneyContext';
 import { togetherDestination } from '../src/pages/Pages';
+import { responseSummary } from '../src/content/encounterOne';
 
 const response = (
   promptId: string,
@@ -107,5 +108,28 @@ describe('JourneyActions', () => {
     render(<MemoryRouter><JourneyActions backTo="/before" continueTo="/after" /></MemoryRouter>);
     expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/before');
     expect(screen.getByRole('link', { name: 'Continue' })).toHaveAttribute('href', '/after');
+  });
+});
+
+
+describe('content-flow refinements', () => {
+  it('summarizes marriage sentence in natural language and keeps story out unless exact sharing asks for it', () => {
+    const r = {
+      promptId: 'marriage-sentence', responseState: 'answered' as const, sharingLevel: 'private' as const,
+      text: 'patience', optionalFollowUp: 'slowing down before responding',
+      selectedValues: ['Life experience', 'Hope for our future'], secondaryFollowUp: 'A private story',
+    };
+    expect(responseSummary(r)).toBe('I described marriage as the lifelong practice of patience. During an ordinary week, that could mean slowing down before responding. This understanding has been shaped by life experience and hope for our future.');
+    expect(responseSummary(r)).not.toContain('A private story');
+    expect(responseSummary(r, true)).toContain('A private story');
+  });
+
+  it('can store the optional private integration note without exposing it through approved content', () => {
+    const state = reducer(initialState, {
+      type: 'integration', partner: 'partner-a',
+      values: { unable: 'Yes, but I want to keep it private', privateNote: 'private integration note' },
+    });
+    expect(state.partners['partner-a'].integration?.privateNote).toBe('private integration note');
+    expect(approvedContent(state)).toEqual([]);
   });
 });

@@ -31,3 +31,9 @@ Production privacy, authentication, synchronization, Firebase, AI, analytics, de
 
 ## Pilot hypotheses
 Test whether sentence completion is concrete enough; three-word selection produces useful stories; prediction creates curiosity rather than pressure; the tradeoff reveals meaning without pushing a format; privacy boundaries are understood; faith content deepens humility; and the encounter feels guided rather than questionnaire-like.
+
+
+## Content-flow refinement: three warmer screens
+A focused usability pass simplified three screens without changing routes, state architecture, storage version, privacy rules or the interaction contract. **Marriage in One Sentence** now asks one concrete ordinary-week follow-up first, then uses optional progressive disclosure for sources and an optional story so the screen does not feel like homework. **What We Want to Remember** replaces the four-blank-field report feeling with a confirmable shared statement, one simple understanding prompt, an optional revisit note and the same persisted next-step choice. **What Stayed With Me?** removes the prediction product-feedback question from private integration, keeps one visible writing prompt by default and reveals a partner-private note only when a partner says something is still hard to express.
+
+All new disclosure controls are ordinary `type="button"` toggles with `aria-expanded`; collapsed sections do not block continuation and saved values persist through Back and refresh. Prediction-and-reveal feedback remains in Pilot Feedback, where it evaluates the prototype rather than the relationship. This was a content-flow refinement only, not an architecture rebuild.

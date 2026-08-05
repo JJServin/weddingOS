@@ -220,6 +220,82 @@ test('J: active encounter contains no removed timeline comparison language', asy
   }
 });
 
+
+
+test('content refinement: marriage sentence uses progressive disclosure without old homework fields', async ({ page }) => {
+  await page.goto('/prepare/partner-a/marriage-sentence');
+  await expect(page.getByText('Which word carries the most weight?')).toHaveCount(0);
+  await expect(page.getByText('What experience or story gave that word its meaning?')).toHaveCount(0);
+  await expect(page.getByText('Which part feels grounded in Scripture, church teaching, conscience, experience or hope?')).toHaveCount(0);
+  await selected(page, /Write privately/).click();
+  await expect(page.getByLabel(/What could this look like during an ordinary week of marriage?/)).toBeVisible();
+  await expect(page.getByText('What has shaped this understanding? Select any that apply.')).toHaveCount(0);
+  const shaped = page.getByRole('button', { name: 'Would you like to say what shaped this belief?' });
+  await expect(shaped).toHaveAttribute('aria-expanded', 'false');
+  await shaped.click();
+  await expect(shaped).toHaveAttribute('aria-expanded', 'true');
+  await selected(page, 'Life experience').click();
+  await selected(page, 'Hope for our future').click();
+  await expect(selected(page, 'Life experience').getByText('Selected')).toBeVisible();
+  await shaped.click();
+  await shaped.click();
+  await expect(selected(page, 'Hope for our future')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('Is there a story or experience you want to remember?')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Add an optional story or experience' }).click();
+  await page.getByLabel('Is there a story or experience you want to remember?').fill('My grandparents showed this slowly.');
+  await page.getByRole('link', { name: 'Continue' }).click();
+  await page.getByRole('link', { name: 'Back' }).click();
+  await expect(page.getByLabel('Is there a story or experience you want to remember?')).toHaveValue('My grandparents showed this slowly.');
+  await page.reload();
+  await expect(page.getByLabel('Is there a story or experience you want to remember?')).toHaveValue('My grandparents showed this slowly.');
+});
+
+test('content refinement: What We Want to Remember confirms suggestions and keeps optional revisit collapsed', async ({ page }) => {
+  await page.goto('/together/mirror');
+  await selected(page, /That reflects our conversation/).click();
+  await page.goto('/together/capture');
+  await expect(page.getByRole('heading', { name: 'What We Want to Remember' })).toBeVisible();
+  await expect(page.getByText('A meaningful difference or emphasis we want to understand better')).toHaveCount(0);
+  await expect(page.getByLabel('Shared statement')).toHaveValue(/serious view of marriage/);
+  await page.goto('/shared-record');
+  await expect(page.getByText('You appear to share a serious view of marriage while emphasizing different parts of how that commitment is lived.')).toHaveCount(1);
+  await expect(page.locator('dt', { hasText: 'A marriage conviction or value we share' }).locator('xpath=following-sibling::dd[1]')).not.toContainText('serious view of marriage');
+  await page.goto('/together/capture');
+  await page.getByRole('button', { name: 'Keep this' }).click();
+  await page.goto('/shared-record');
+  await expect(page.locator('dt', { hasText: 'A marriage conviction or value we share' }).locator('xpath=following-sibling::dd[1]')).toContainText('serious view of marriage');
+  await page.goto('/together/capture');
+  await page.getByRole('button', { name: 'Leave it out' }).click();
+  await expect(page.getByLabel('Shared statement')).toHaveValue('');
+  await expect(page.getByText('Something we want to revisit', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Is there something we want to revisit?' }).click();
+  await page.getByLabel('Something we want to revisit').fill('How we practice hospitality.');
+  await selected(page, /Talk about this again/).click();
+  await page.reload();
+  await expect(page.getByLabel('Something we want to revisit')).toHaveValue('How we practice hospitality.');
+  await expect(selected(page, /Talk about this again/)).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/together/pause-check');
+  await expect(page.getByRole('link', { name: 'Preserve what matters' })).toHaveAttribute('href', '/together/close');
+});
+
+test('content refinement: private integration is warmer, partner-specific, and omits prediction prompt', async ({ page }) => {
+  await page.goto('/integration/partner-a');
+  await expect(page.getByRole('heading', { name: 'What Stayed With Me?' })).toBeVisible();
+  await expect(page.getByText('Did prediction-and-reveal create curiosity or pressure?')).toHaveCount(0);
+  await page.getByLabel(/What is one thing you understand better about your partner?/).fill('A values steadiness.');
+  await selected(page, /Mostly heard/).click();
+  await selected(page, /Yes, but I want to keep it private/).click();
+  await page.getByLabel('Would you like to leave yourself a private note?').fill('Ask for more time privately.');
+  await selected(page, /Another conversation/).click();
+  await page.reload();
+  await expect(page.getByLabel('Would you like to leave yourself a private note?')).toHaveValue('Ask for more time privately.');
+  await page.goto('/integration/partner-b');
+  await expect(page.getByLabel(/What is one thing you understand better about your partner?/)).toHaveValue('');
+  await expect(page.getByLabel('Would you like to leave yourself a private note?')).toHaveCount(0);
+  await page.goto('/shared-record');
+  await expect(page.locator('body')).not.toContainText('Ask for more time privately.');
+});
+
 test('choice-group audit: remaining selectable controls update, identify, and persist', async ({ page }) => {
   await page.goto('/prepare/partner-a/ten-year-words');
   await selected(page, 'Peaceful').click();
@@ -263,17 +339,17 @@ test('choice-group audit: remaining selectable controls update, identify, and pe
 
   await page.goto('/together/capture');
   await selected(page, /Gather more information/).click();
-  await selected(page, /Pause intentionally/).click();
-  await expect(selected(page, /Gather more information/)).toHaveAttribute('aria-pressed', 'false');
+  await selected(page, /Pause for now/).click();
+  await expect(selected(page, /Gather information/)).toHaveAttribute('aria-pressed', 'false');
   await page.reload();
-  await expect(selected(page, /Pause intentionally/)).toHaveAttribute('aria-pressed', 'true');
+  await expect(selected(page, /Pause for now/)).toHaveAttribute('aria-pressed', 'true');
 
   await page.goto('/integration/partner-a');
-  await selected(page, 'Yes').click();
-  await selected(page, 'Mostly').click();
-  await expect(selected(page, 'Yes')).toHaveAttribute('aria-pressed', 'false');
+  await selected(page, /I felt heard/).click();
+  await selected(page, /Mostly heard/).click();
+  await expect(selected(page, /I felt heard/)).toHaveAttribute('aria-pressed', 'false');
   await page.reload();
-  await expect(selected(page, 'Mostly')).toHaveAttribute('aria-pressed', 'true');
+  await expect(selected(page, /Mostly heard/)).toHaveAttribute('aria-pressed', 'true');
 
   await page.goto('/feedback');
   const firstScale = selected(page, '1').first();
