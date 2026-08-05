@@ -1,0 +1,9 @@
+export type PartnerId='partner-a'|'partner-b'; export type Role=PartnerId|'together'; export type JourneyMode='core'|'christ-centered';
+export type ReflectionState='not-started'|'answered'|'silent-reflection'|'needs-time'|'skipped'; export type SharingLevel='private'|'share-exact'|'summary-requested'|'self-share'|'not-ready';
+export interface PrivateResponse {promptId:string;responseState:ReflectionState;text?:string;selectedValues?:string[];selectedValue?:string;customValue?:string;optionalFollowUp?:string;secondaryFollowUp?:string;sharingLevel:SharingLevel;approvedSummary?:string}
+export type MirrorAssessment='reflects'|'partly'|'not-quite'|'do-not-save'; export type PauseCheckValue='understand-better'|'important-difference'|'need-time'|'defensive'|'outside-guidance'|'peaceful'|'emotionally-tired';
+export interface PartnerFeedback {scales:Record<string,number>;strongestMoment?:string;awkwardMoment?:string;missing?:string;importantChange?:string}
+export interface PartnerState {preparationStatus:'not-started'|'in-progress'|'complete';responses:Record<string,PrivateResponse>;listenerCheck?:string;integration?:{learned?:string;heard?:string;prediction?:string;unable?:string;privateNote?:string;next?:string};feedback?:PartnerFeedback}
+export interface RevealEntry {prediction?:string;ready:boolean;listenerCheck?:string}
+export interface SharedState {mode:JourneyMode;stage:string;previousPath?:string;bridgeApprovals:PartnerId[];discoveries:{sharedValue?:string;difference?:string;question?:string;understandsBetter?:string;nextStep?:string};sharedNotes?:string;mirror:{generatedText:string;assessment?:MirrorAssessment;corrections:Partial<Record<'partly'|'not-quite',string>>;saveApproved:boolean};pauseCheck?:PauseCheckValue;reveal:{entries:Record<PartnerId,RevealEntry>;revealed:boolean}}
+export interface JourneyState {schemaVersion:2;role:Role;partners:Record<PartnerId,PartnerState>;shared:SharedState}
