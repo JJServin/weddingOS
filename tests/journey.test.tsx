@@ -14,6 +14,8 @@ import {
 } from '../src/state/JourneyContext';
 import { togetherDestination } from '../src/pages/Pages';
 import { responseSummary } from '../src/content/encounterOne';
+import { encounterTwoDestination } from '../src/pages/EncounterTwoPages';
+import { encounterTwoPromptIds, encounterTwoSummary } from '../src/content/encounterTwo';
 
 const response = (
   promptId: string,
@@ -131,5 +133,40 @@ describe('content-flow refinements', () => {
     });
     expect(state.partners['partner-a'].integration?.privateNote).toBe('private integration note');
     expect(approvedContent(state)).toEqual([]);
+  });
+});
+
+describe('Encounter Two state isolation', () => {
+  it('uses unique prompt IDs without changing Encounter One preparation', () => {
+    expect(encounterTwoPromptIds.every(id => id.startsWith('e2-'))).toBe(true);
+    const complete = reducer(initialState, { type: 'status', partner: 'partner-a', status: 'complete' });
+    const state = reducer(complete, {
+      type: 'response', partner: 'partner-a',
+      response: { promptId: 'e2-preserve-values', responseState: 'answered', sharingLevel: 'private', selectedValues: ['Joy'] },
+    });
+    expect(state.partners['partner-a'].responses['e2-preserve-values'].selectedValues).toEqual(['Joy']);
+    expect(state.partners['partner-b'].responses['e2-preserve-values']).toBeUndefined();
+    expect(state.partners['partner-a'].preparationStatus).toBe('complete');
+  });
+
+  it('hydrates Encounter Two defaults into existing schema-v2 storage', () => {
+    const state = hydrateJourneyState({ schemaVersion: 2, partners: {}, shared: {} });
+    expect(state.shared.encounterTwo.preparation['partner-a']).toBe('not-started');
+    expect(state.shared.encounterTwo.sharing['partner-b']).toEqual({});
+    expect(state.shared.encounterTwo.reveal.entries['partner-a']).toEqual({ ready: false });
+    expect(state.shared.encounterTwo.tension).toEqual([]);
+  });
+
+  it('skips discernment in Core mode in both directions', () => {
+    expect(encounterTwoDestination('tradeoff', 'next', 'core')).toBe('/encounter-two/together/capture');
+    expect(encounterTwoDestination('capture', 'back', 'core')).toBe('/encounter-two/together/tradeoff');
+    expect(encounterTwoDestination('tradeoff', 'next', 'christ-centered')).toBe('/encounter-two/together/discern');
+  });
+
+  it('creates natural summaries for approved sharing review', () => {
+    expect(encounterTwoSummary('e2-preserve-values', { selectedValues: ['Financial peace', 'Joy'] }))
+      .toBe('I most want this season to protect financial peace, joy.');
+    expect(encounterTwoSummary('e2-pressure', { selectedValue: 'Family expectations' }))
+      .toBe('I notice some pressure around family expectations.');
   });
 });

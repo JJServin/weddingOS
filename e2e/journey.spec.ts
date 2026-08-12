@@ -14,6 +14,90 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => localStorage.clear());
 });
 
+test('Encounter Two entry keeps the Encounter One record accessible', async ({ page }) => {
+  await page.goto('/shared-record');
+  await page.getByRole('link', { name: 'Begin Encounter Two' }).click();
+  await expect(page.getByRole('heading', { name: 'What Are We Trying to Preserve?' })).toBeVisible();
+  await page.goto('/encounter-two/record');
+  await page.getByRole('link', { name: 'View Encounter One record' }).first().click();
+  await expect(page.getByRole('heading', { name: 'Our Encounter One Record' })).toBeVisible();
+});
+
+test('Encounter Two private values cap, persist, and remain partner-specific', async ({ page }) => {
+  await page.goto('/encounter-two/prepare/partner-a/values');
+  for (const value of ['Joy', 'Rest', 'Simplicity']) await selected(page, value).click();
+  await expect(selected(page, 'Adventure')).toBeDisabled();
+  await page.reload();
+  for (const value of ['Joy', 'Rest', 'Simplicity']) await expect(selected(page, value)).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('link', { name: 'Continue' }).click();
+  await expect(selected(page, 'Joy')).toBeVisible();
+  await expect(selected(page, 'Financial peace')).toHaveCount(0);
+  await page.getByRole('link', { name: 'Back' }).click();
+  await page.goto('/encounter-two/prepare/partner-b/values');
+  await expect(selected(page, 'Joy')).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('Encounter Two pressure starts private and never leaks into Together mode', async ({ page }) => {
+  await page.goto('/encounter-two/prepare/partner-a/pressure');
+  await expect(page.getByLabel(/What makes this feel like pressure/)).toHaveCount(0);
+  await selected(page, 'Family expectations').click();
+  await page.getByRole('button', { name: 'Want to say more?' }).click();
+  await page.getByLabel(/What makes this feel like pressure/).fill('private-pressure-phrase');
+  await page.goto('/encounter-two/prepare/partner-a/sharing');
+  const pressure = page.locator('article').filter({ hasText: 'What is pulling on me' });
+  await expect(pressure.getByRole('button', { name: /Keep this private/ })).toHaveAttribute('aria-pressed', 'true');
+  await page.goto('/encounter-two/together');
+  await expect(page.getByText('private-pressure-phrase')).toHaveCount(0);
+});
+
+test('Encounter Two simultaneous prediction hides, persists, and reveals without scoring', async ({ page }) => {
+  await page.goto('/encounter-two/together/reveal');
+  await selected(page, 'Joy').first().click();
+  await page.getByRole('button', { name: 'Hide my prediction and mark ready' }).first().click();
+  await expect(page.getByText('Prediction hidden · Ready')).toBeVisible();
+  await selected(page, 'Rest').click();
+  await page.getByRole('button', { name: 'Hide my prediction and mark ready' }).click();
+  await page.reload();
+  await page.getByRole('button', { name: 'Reveal both perspectives' }).click();
+  await expect(page.getByText('Partner A predicted:')).toBeVisible();
+  await expect(page.getByText(/^(correct|incorrect|score|percentage|match)$/i)).toHaveCount(0);
+});
+
+test('Encounter Two Core routing, capture, checkout privacy, and record remain neutral', async ({ page }) => {
+  await page.goto('/encounter-two/together/tradeoff');
+  await expect(page.getByText(/Which would you choose/i)).toHaveCount(0);
+  await selected(page, 'Family belonging').click();
+  await selected(page, 'Financial peace').click();
+  await expect(selected(page, 'Rest')).toBeDisabled();
+  await page.getByRole('link', { name: 'Continue' }).click();
+  await expect(page).toHaveURL(/encounter-two\/together\/capture/);
+  await page.getByRole('link', { name: 'Back' }).click();
+  await expect(page).toHaveURL(/encounter-two\/together\/tradeoff/);
+  await page.goto('/encounter-two/together/capture');
+  await selected(page, 'Nothing we need to save yet').click();
+  await selected(page, 'Pause for now').click();
+  await page.reload();
+  await expect(selected(page, 'Pause for now')).toHaveAttribute('aria-pressed', 'true');
+  await page.goto('/encounter-two/integration/partner-a');
+  await selected(page, 'Yes, but I want to keep it private').click();
+  await page.getByLabel(/leave yourself a private note/).fill('e2-private-checkout-note');
+  await page.goto('/encounter-two/integration/partner-b');
+  await expect(page.getByLabel(/leave yourself a private note/)).toHaveCount(0);
+  await page.goto('/encounter-two/record');
+  await expect(page.getByText('e2-private-checkout-note')).toHaveCount(0);
+  await expect(page.getByText('Encounter Three — What Story Are We Celebrating?')).toBeVisible();
+});
+
+test('Encounter Two remains usable at a 375px mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/encounter-two/prepare/partner-a/values');
+  await selected(page, 'Joy').click();
+  await expect(selected(page, /Joy/)).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Continue' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
+});
+
 test('A: text does not carry forward into unanswered prompts', async ({ page }) => {
   await page.goto('/prepare/partner-a/marriage-sentence');
   await selected(page, /Write privately/).click();
